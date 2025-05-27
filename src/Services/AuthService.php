@@ -3,10 +3,21 @@ namespace App\Services;
 
 use PDO;
 use App\Core\Database;
+use App\Core\Session; // Добавляем импорт!
 use App\Services\CartService;
 
 class AuthService
 {
+    /**
+     * Инициализация сессии при каждом обращении
+     */
+    private static function ensureSession(): void
+    {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            Session::start(); // Используем наш безопасный класс Session
+        }
+    }
+
     public static function login(string $login, string $pass): array
     {
         $pdo = Database::getConnection();
@@ -25,10 +36,10 @@ class AuthService
             return [false, 'Неверный логин или пароль'];
         }
     
-        // ОБЯЗАТЕЛЬНО! Стартуем сессию, если не активна
-         if (session_status() !== PHP_SESSION_ACTIVE) session_start();
-        session_regenerate_id(true);
-    
+        // Теперь вызываем безопасную инициализацию
+        self::ensureSession();
+        
+        // Session::start() уже сделает session_regenerate_id
         $_SESSION['user_id']  = $user['user_id'];
         $_SESSION['username'] = $user['username'];
         $_SESSION['role']     = $user['role'];
@@ -36,18 +47,18 @@ class AuthService
     
         \App\Services\CartService::mergeGuestCartWithUser((int)$user['user_id']);
     
-        session_write_close(); // обязательно!
-    
         return [true, ''];
     }
 
     public static function check(): bool
     {
+        self::ensureSession();
         return !empty($_SESSION['user_id']);
     }
 
     public static function user(): array
     {
+        self::ensureSession();
         return [
             'id'       => $_SESSION['user_id']  ?? null,
             'username' => $_SESSION['username'] ?? '',
@@ -59,9 +70,9 @@ class AuthService
     {
         return self::user()['role'] === $role;
     }
+    
     public static function isAdmin(): bool
     {
-        // проверяем, что залогинен и роль равна 'admin'
         return self::check() && self::checkRole('admin');
     }
 }
