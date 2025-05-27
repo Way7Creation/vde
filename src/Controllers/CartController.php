@@ -78,6 +78,7 @@ class CartController
         Layout::render('cart/view', [
             'cartRows' => $rows,
             'cart' => $cart,
+            'products' => $products  // ← ДОБАВИТЬ ЭТУ СТРОКУ!
         ]);
     }
 
