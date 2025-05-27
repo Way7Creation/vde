@@ -1,0 +1,218 @@
+{
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 1,
+    "index.max_ngram_diff": 20,
+    "index.max_result_window": 50000,
+    "analysis": {
+      "char_filter": {
+        "ru_en_keyboard_mapping": {
+          "type": "mapping",
+          "mappings": [
+            "q=>й","w=>ц","e=>у","r=>к","t=>е","y=>н","u=>г","i=>ш","o=>щ","p=>з","[=>х","]=>ъ",
+            "a=>ф","s=>ы","d=>в","f=>а","g=>п","h=>р","j=>о","k=>л","l=>д",";=>ж","'=>э",
+            "z=>я","x=>ч","c=>с","v=>м","b=>и","n=>т","m=>ь",",=>б",".=>ю",
+            "ё=>е",
+            "A=>А","B=>В","E=>Е","K=>К","M=>М","H=>Н","O=>О","P=>Р","C=>С","T=>Т","Y=>У","X=>Х",
+            "0=>О","3=>З","1=>I",
+            "/=> ","\\\\=> "
+          ]
+        },
+        "special_chars_filter": {
+          "type": "pattern_replace",
+          "pattern": "[\\-\\._/\\\\\\s]+",
+          "replacement": " "
+        },
+        "clean_filter": {
+          "type": "pattern_replace",
+          "pattern": "[^\\p{L}\\p{N}\\s]",
+          "replacement": ""
+        }
+      },
+      "tokenizer": {
+        "code_tokenizer": {
+          "type": "pattern",
+          "pattern": "[\\s\\-_/]+"
+        },
+        "edge_ngram_tokenizer": {
+          "type": "edge_ngram",
+          "min_gram": 2,
+          "max_gram": 20,
+          "token_chars": ["letter", "digit"]
+        }
+      },
+      "filter": {
+        "lowercase_filter": { "type": "lowercase" },
+        "synonym_filter": {
+          "type": "synonym_graph",
+          "synonyms": [
+            "лампа,лампочка,светильник,освещение",
+            "выключатель,переключатель,switch,свитч,выкл",
+            "розетка,разъем,socket,гнездо",
+            "кабель,провод,шнур,cable",
+            "автомат,автоматический выключатель,авт выкл",
+            "щит,щиток,шкаф,бокс",
+            "удлинитель,сетевой фильтр,пилот",
+            "трансформатор,трансф,транс",
+            "стабилизатор,стаб",
+            "упс,ибп,ups,бесперебойник",
+            "вт,ватт,w,watt",
+            "квт,киловатт,kw",
+            "а,ампер,a,amp",
+            "в,вольт,v,volt",
+            "м,метр,m,meter",
+            "мм,миллиметр,mm",
+            "см,сантиметр,cm",
+            "шнайдер,schneider,шнейдер",
+            "легранд,legrand",
+            "абб,abb",
+            "иэк,iek",
+            "экф,ekf"
+          ]
+        },
+        "word_delimiter_filter": {
+          "type": "word_delimiter",
+          "generate_word_parts": true,
+          "generate_number_parts": true,
+          "catenate_words": true,
+          "catenate_numbers": true,
+          "catenate_all": true,
+          "split_on_case_change": true,
+          "preserve_original": true,
+          "split_on_numerics": true
+        },
+        "russian_stemmer": { "type": "stemmer", "language": "russian" },
+        "english_stemmer": { "type": "stemmer", "language": "english" },
+        "ngram_filter": { "type": "ngram", "min_gram": 3, "max_gram": 4 },
+        "shingle_filter": { "type": "shingle", "min_shingle_size": 2, "max_shingle_size": 3, "output_unigrams": true }
+      },
+      "normalizer": {
+        "lowercase_normalizer": { "type": "custom", "filter": ["lowercase"] }
+      },
+      "analyzer": {
+        "index_analyzer": {
+          "tokenizer": "standard",
+          "char_filter": ["ru_en_keyboard_mapping","special_chars_filter"],
+          "filter": [
+            "lowercase_filter",
+            "synonym_filter",
+            "word_delimiter_filter",
+            "russian_stemmer",
+            "shingle_filter"
+          ]
+        },
+        "search_analyzer": {
+          "tokenizer": "standard",
+          "char_filter": ["ru_en_keyboard_mapping","special_chars_filter"],
+          "filter": [
+            "lowercase_filter",
+            "synonym_filter",
+            "word_delimiter_filter"
+          ]
+        },
+        "code_analyzer": {
+          "tokenizer": "code_tokenizer",
+          "char_filter": ["special_chars_filter"],
+          "filter": ["lowercase_filter","word_delimiter_filter"]
+        },
+        "autocomplete_analyzer": {
+          "tokenizer": "edge_ngram_tokenizer",
+          "char_filter": ["ru_en_keyboard_mapping","special_chars_filter"],
+          "filter": ["lowercase_filter"]
+        },
+        "ngram_analyzer": {
+          "tokenizer": "standard",
+          "char_filter": ["ru_en_keyboard_mapping","special_chars_filter"],
+          "filter": ["lowercase_filter","ngram_filter"]
+        },
+        "keyword_lowercase": {
+          "tokenizer": "keyword",
+          "filter": ["lowercase_filter"]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "product_id": { "type": "long" },
+      "external_id": {
+        "type": "text",
+        "analyzer": "code_analyzer",
+        "fields": {
+          "keyword": { "type": "keyword", "normalizer": "lowercase_normalizer" },
+          "ngram": { "type": "text", "analyzer": "ngram_analyzer" },
+          "prefix": { "type": "text", "analyzer": "autocomplete_analyzer", "search_analyzer": "keyword_lowercase" }
+        }
+      },
+      "sku": {
+        "type": "text",
+        "analyzer": "code_analyzer",
+        "fields": {
+          "keyword": { "type": "keyword", "normalizer": "lowercase_normalizer" },
+          "ngram": { "type": "text", "analyzer": "ngram_analyzer" },
+          "prefix": { "type": "text", "analyzer": "autocomplete_analyzer", "search_analyzer": "keyword_lowercase" }
+        }
+      },
+      "name": {
+        "type": "text",
+        "analyzer": "index_analyzer",
+        "search_analyzer": "search_analyzer",
+        "fields": {
+          "keyword": { "type": "keyword" },
+          "ngram": { "type": "text", "analyzer": "ngram_analyzer" },
+          "autocomplete": { "type": "text", "analyzer": "autocomplete_analyzer", "search_analyzer": "search_analyzer" }
+        }
+      },
+      "description": {
+        "type": "text",
+        "analyzer": "index_analyzer",
+        "search_analyzer": "search_analyzer",
+        "fields": { "ngram": { "type": "text", "analyzer": "ngram_analyzer" } }
+      },
+      "search_text": { "type": "text", "analyzer": "index_analyzer", "search_analyzer": "search_analyzer" },
+      "brand_name": {
+        "type": "text",
+        "analyzer": "index_analyzer",
+        "search_analyzer": "search_analyzer",
+        "fields": {
+          "keyword": { "type": "keyword" },
+          "ngram": { "type": "text", "analyzer": "ngram_analyzer" }
+        }
+      },
+      "series_name": { "type": "text", "analyzer": "index_analyzer", "search_analyzer": "search_analyzer", "fields": { "keyword": { "type": "keyword" } } },
+      "categories": { "type": "text", "analyzer": "index_analyzer", "search_analyzer": "search_analyzer", "fields": { "keyword": { "type": "keyword" } } },
+      "category_slugs": { "type": "keyword" },
+      "attributes": {
+        "type": "nested",
+        "properties": {
+          "name": { "type": "text", "analyzer": "index_analyzer", "fields": { "keyword": { "type": "keyword" } } },
+          "value": { "type": "text", "analyzer": "index_analyzer", "fields": { "keyword": { "type": "keyword" } } },
+          "unit": { "type": "keyword" }
+        }
+      },
+      "image_urls": { "type": "keyword", "index": false },
+      "unit": { "type": "keyword" },
+      "min_sale": { "type": "float" },
+      "weight": { "type": "float" },
+      "dimensions": { "type": "keyword" },
+      "base_price": { "type": "float" },
+      "retail_price": { "type": "float" },
+      "price_range": { "type": "long" },
+      "stock_total": { "type": "integer" },
+      "in_stock": { "type": "boolean" },
+      "has_certificate": { "type": "boolean" },
+      "has_manual": { "type": "boolean" },
+      "has_drawing": { "type": "boolean" },
+      "created_at": { "type": "date", "format": "yyyy-MM-dd HH:mm:ss" },
+      "updated_at": { "type": "date", "format": "yyyy-MM-dd HH:mm:ss" },
+      "suggest": {
+        "type": "completion",
+        "analyzer": "index_analyzer",
+        "search_analyzer": "search_analyzer",
+        "preserve_separators": false,
+        "preserve_position_increments": false,
+        "max_input_length": 50
+      }
+    }
+  }
+}
