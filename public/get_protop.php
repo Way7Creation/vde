@@ -377,6 +377,42 @@ if (!empty($filters['search'])) {
     }
 }
 
+if (!empty($products)) {
+    // Получаем ID найденных товаров
+    $productIds = array_column($products, 'product_id');
+    
+    // Загружаем динамические данные
+    require_once __DIR__ . '/../src/Services/DynamicProductDataService.php';
+    $dynamicService = new \App\Services\DynamicProductDataService();
+    
+    // Определяем пользователя
+    session_start();
+    $userId = $_SESSION['user_id'] ?? null;
+    $cityId = (int)($_GET['city_id'] ?? 1);
+    
+    // Получаем цены и остатки
+    $dynamicData = $dynamicService->getProductsDynamicData($productIds, $cityId, $userId);
+    
+    // Обогащаем товары динамическими данными
+    foreach ($products as &$product) {
+        $pid = $product['product_id'];
+        if (isset($dynamicData[$pid])) {
+            // Добавляем актуальную цену
+            $product['base_price'] = $dynamicData[$pid]['price']['final'] ?? null;
+            $product['original_price'] = $dynamicData[$pid]['price']['base'] ?? null;
+            $product['has_special_price'] = $dynamicData[$pid]['price']['has_special'] ?? false;
+            
+            // Добавляем остатки
+            $product['in_stock'] = $dynamicData[$pid]['available'] ?? false;
+            $product['stock_quantity'] = $dynamicData[$pid]['stock']['quantity'] ?? 0;
+            
+            // Добавляем информацию о доставке
+            $product['delivery_date'] = $dynamicData[$pid]['delivery']['date'] ?? null;
+            $product['delivery_text'] = $dynamicData[$pid]['delivery']['text'] ?? 'Уточняйте';
+        }
+    }
+}
+
 // Фильтры по точным значениям
 if (!empty($filters['brand_name'])) {
     $filterClauses[] = ['term' => ['brand_name.keyword' => $filters['brand_name']]];
