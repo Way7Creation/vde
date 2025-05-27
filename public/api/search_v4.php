@@ -19,7 +19,7 @@ header('X-Frame-Options: DENY');
 header('X-XSS-Protection: 1; mode=block');
 
 // CORS настройки (настройте под ваш домен!)
-$allowedOrigins = ['https://yourdomain.com', 'http://localhost:3000'];
+$allowedOrigins = ['https://vdestor.ru', 'http://localhost:3000'];
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 
 if (in_array($origin, $allowedOrigins)) {
