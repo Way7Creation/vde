@@ -1,0 +1,165 @@
+{
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 1,
+    "index.max_ngram_diff": 20,
+    "index.max_result_window": 50000,
+    "analysis": {
+      "char_filter": {
+        "ru_en_keyboard_mapping": {
+          "type": "mapping",
+          "mappings": [
+            "q=>й","w=>ц","e=>у","r=>к","t=>е","y=>н","u=>г","i=>ш","o=>щ","z=>з","p=>п",
+            "a=>ф","s=>ы","d=>в","f=>а","g=>п","h=>р","j=>о","k=>л","l=>д",
+            "x=>ч","c=>с","v=>м","b=>и","n=>т","m=>ь",
+            "ё=>е","й=>и",
+            "A=>А","B=>В","E=>Е","K=>К","M=>М","H=>Н","O=>О","P=>Р","C=>С","T=>Т","Y=>У","X=>Х",
+            "/=> ","\\\\=> ","-=> ","_=> "
+          ]
+        },
+        "code_normalizer": {
+          "type": "pattern_replace",
+          "pattern": "[\\s\\-\\._/]+",
+          "replacement": ""
+        }
+      },
+      "tokenizer": {
+        "edge_ngram_tokenizer": {
+          "type": "edge_ngram",
+          "min_gram": 2,
+          "max_gram": 20,
+          "token_chars": ["letter", "digit"]
+        }
+      },
+      "filter": {
+        "synonym_filter": {
+          "type": "synonym_graph",
+          "synonyms": [
+            "выключатель,переключатель,switch,свитч",
+            "розетка,разъем,socket,гнездо",
+            "кабель,провод,шнур,cable,wire",
+            "автомат,автоматический выключатель,авт выкл,mcb",
+            "щит,щиток,шкаф,бокс,panel",
+            "лампа,лампочка,светильник,lamp,light",
+            "вт,ватт,w,watt=>ватт",
+            "квт,киловатт,kw,kilowatt=>киловатт",
+            "а,ампер,a,amp,ampere=>ампер",
+            "в,вольт,v,volt=>вольт",
+            "мм,миллиметр,mm=>миллиметр",
+            "м,метр,m,meter=>метр",
+            "шнайдер,schneider,шнейдер=>schneider",
+            "легранд,legrand=>legrand",
+            "абб,abb=>abb",
+            "иэк,iek,иек=>iek"
+          ]
+        },
+        "russian_stemmer": {
+          "type": "stemmer",
+          "language": "russian"
+        },
+        "shingle_filter": {
+          "type": "shingle",
+          "min_shingle_size": 2,
+          "max_shingle_size": 3,
+          "output_unigrams": true
+        }
+      },
+      "analyzer": {
+        "text_analyzer": {
+          "tokenizer": "standard",
+          "char_filter": ["ru_en_keyboard_mapping"],
+          "filter": ["lowercase", "synonym_filter", "russian_stemmer", "shingle_filter"]
+        },
+        "code_analyzer": {
+          "tokenizer": "keyword",
+          "char_filter": ["code_normalizer"],
+          "filter": ["lowercase"]
+        },
+        "autocomplete_analyzer": {
+          "tokenizer": "edge_ngram_tokenizer",
+          "char_filter": ["ru_en_keyboard_mapping"],
+          "filter": ["lowercase"]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "product_id": { "type": "long" },
+      "external_id": {
+        "type": "text",
+        "analyzer": "code_analyzer",
+        "fields": {
+          "keyword": { "type": "keyword" },
+          "autocomplete": { "type": "text", "analyzer": "autocomplete_analyzer" }
+        }
+      },
+      "sku": {
+        "type": "text",
+        "analyzer": "code_analyzer",
+        "fields": {
+          "keyword": { "type": "keyword" },
+          "autocomplete": { "type": "text", "analyzer": "autocomplete_analyzer" }
+        }
+      },
+      "name": {
+        "type": "text",
+        "analyzer": "text_analyzer",
+        "fields": {
+          "keyword": { "type": "keyword" },
+          "autocomplete": { "type": "text", "analyzer": "autocomplete_analyzer" }
+        }
+      },
+      "description": {
+        "type": "text",
+        "analyzer": "text_analyzer"
+      },
+      "brand_id": { "type": "integer" },
+      "brand_name": {
+        "type": "text",
+        "analyzer": "text_analyzer",
+        "fields": { "keyword": { "type": "keyword" } }
+      },
+      "series_id": { "type": "integer" },
+      "series_name": {
+        "type": "text",
+        "analyzer": "text_analyzer",
+        "fields": { "keyword": { "type": "keyword" } }
+      },
+      "categories": {
+        "type": "text",
+        "analyzer": "text_analyzer",
+        "fields": { "keyword": { "type": "keyword" } }
+      },
+      "category_ids": { "type": "integer" },
+      "attributes": {
+        "type": "nested",
+        "properties": {
+          "name": { "type": "text", "analyzer": "text_analyzer" },
+          "value": { "type": "text", "analyzer": "text_analyzer" },
+          "unit": { "type": "keyword" }
+        }
+      },
+      "unit": { "type": "keyword" },
+      "min_sale": { "type": "integer" },
+      "weight": { "type": "float" },
+      "dimensions": { "type": "keyword" },
+      "images": { "type": "keyword" },
+      "documents": {
+        "type": "object",
+        "properties": {
+          "certificates": { "type": "integer" },
+          "manuals": { "type": "integer" },
+          "drawings": { "type": "integer" }
+        }
+      },
+      "created_at": { "type": "date" },
+      "updated_at": { "type": "date" },
+      "suggest": {
+        "type": "completion",
+        "analyzer": "text_analyzer",
+        "search_analyzer": "text_analyzer"
+      }
+    }
+  }
+}
