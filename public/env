@@ -1,0 +1,16 @@
+# Основные
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://vdestor.ru
+
+# Сессии
+SESSION_NAME=MYAPPSESSID
+SESSION_LIFETIME=2592000
+
+# Почта
+MAIL_FROM=vde76ru@yandex.ru
+
+# Поиск/кеш/лимиты
+ALLOWED_ORIGINS=https://vdestor.ru
+CACHE_DRIVER=apcu
+RATE_LIMIT_SEARCH=30
