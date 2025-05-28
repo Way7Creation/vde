@@ -13,6 +13,7 @@ import { showToast } from './utils.js';
 import { renderProductsTable, copyText } from './renderProducts.js';
 import { createSpecification } from './specification.js';
 import { smartSearch } from './smartSearch.js';
+import { productService, stateManager } from './services/ProductService.js';
 
 window.itemsPerPage   = parseInt(sessionStorage.getItem('itemsPerPage')  || '20', 10);
 window.currentPage    = 1;
