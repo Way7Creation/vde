@@ -13,7 +13,7 @@ export async function fetchFromOpenSearch(params) {
         params.filters = JSON.stringify(params.filters);
     }
     const query = new URLSearchParams(params).toString();
-    // ВАЖНО: используем новый файл get_protop.php
+    // Используем новый API endpoint
     const res = await fetch(`/api/search_v4.php?${query}`);
     if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
