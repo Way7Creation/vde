@@ -4,6 +4,9 @@ use App\Core\Database;
 use App\Core\CSRF;
 use App\Services\AuthService;
 
+// Добавляем правильные CSP заголовки
+header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self'");
+
 try {
     $pdo = Database::getConnection();
     $stmt = $pdo->query("SELECT city_id, name FROM cities ORDER BY name");
@@ -291,15 +294,22 @@ $current_path = $_SERVER['REQUEST_URI'] ?? '/';
     
     // Функция обновления бейджа корзины
     function updateCartBadge() {
-        // Здесь должен быть AJAX запрос для получения количества товаров в корзине
-        // Пока заглушка
-        const cartBadge = document.getElementById('cartBadge');
-        const cartCount = 0; // Получить из API
-        if (cartCount > 0) {
-            cartBadge.textContent = cartCount;
-            cartBadge.style.display = 'block';
-        } else {
-            cartBadge.style.display = 'none';
-        }
+        fetch('/cart/json')
+            .then(res => res.json())
+            .then(data => {
+                const cartBadge = document.getElementById('cartBadge');
+                const cart = data.cart || {};
+                const totalItems = Object.values(cart).reduce((sum, item) => sum + (item.quantity || 0), 0);
+                
+                if (totalItems > 0) {
+                    cartBadge.textContent = totalItems;
+                    cartBadge.style.display = 'block';
+                } else {
+                    cartBadge.style.display = 'none';
+                }
+            })
+            .catch(() => {
+                // Игнорируем ошибки
+            });
     }
 </script>
