@@ -6,12 +6,13 @@ use App\Services\AuthService;
 
 // ИСПРАВЛЕННЫЙ CSP заголовок с правильными источниками
 $cspDirectives = [
-    "default-src" => "'self'",
+    "default-src" => "'self' https://vdestor.ru",
     "script-src" => "'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net",
     "style-src" => "'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com",
+    "style-src-elem" => "'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com", 
     "font-src" => "'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:",
     "img-src" => "'self' data: https: blob:",
-    "connect-src" => "'self' https://localhost:9200", // Добавлен OpenSearch
+    "connect-src" => "'self' https://localhost:9200 https://vdestor.ru",
     "frame-src" => "'self'",
     "object-src" => "'none'",
     "base-uri" => "'self'",
