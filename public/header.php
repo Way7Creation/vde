@@ -4,8 +4,39 @@ use App\Core\Database;
 use App\Core\CSRF;
 use App\Services\AuthService;
 
-// Добавляем правильные CSP заголовки
-header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self'");
+// ИСПРАВЛЕННЫЙ CSP заголовок с правильными источниками
+$cspDirectives = [
+    "default-src" => "'self'",
+    "script-src" => "'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net",
+    "style-src" => "'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com",
+    "font-src" => "'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:",
+    "img-src" => "'self' data: https: blob:",
+    "connect-src" => "'self' https://localhost:9200", // Добавлен OpenSearch
+    "frame-src" => "'self'",
+    "object-src" => "'none'",
+    "base-uri" => "'self'",
+    "form-action" => "'self'",
+    "upgrade-insecure-requests" => ""
+];
+
+// Формируем CSP строку
+$cspString = "";
+foreach ($cspDirectives as $directive => $value) {
+    if ($value !== "") {
+        $cspString .= $directive . " " . $value . "; ";
+    } else {
+        $cspString .= $directive . "; ";
+    }
+}
+
+// Устанавливаем заголовок
+header("Content-Security-Policy: " . trim($cspString));
+
+// Дополнительные заголовки безопасности
+header("X-Content-Type-Options: nosniff");
+header("X-Frame-Options: SAMEORIGIN");
+header("X-XSS-Protection: 1; mode=block");
+header("Referrer-Policy: strict-origin-when-cross-origin");
 
 try {
     $pdo = Database::getConnection();
@@ -26,13 +57,16 @@ $current_path = $_SERVER['REQUEST_URI'] ?? '/';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VDestor B2B - Электротехническое оборудование</title>
     
-    <!-- Шрифты -->
+    <!-- Preconnect для ускорения загрузки -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    
+    <!-- Шрифты -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Иконки -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Иконки Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     
     <!-- Фавикон -->
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
@@ -43,6 +77,10 @@ $current_path = $_SERVER['REQUEST_URI'] ?? '/';
     
     <!-- Основные стили -->
     <link rel="stylesheet" href="/assets/dist/assets/main-CI3jr1e0.css">
+    
+    <!-- colResizable для таблиц (если используется) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/colresizable/1.6.0/colResizable-1.6.min.js" integrity="sha512-DUkM4H8lPpFPQUSU2B6bXS/hyUdBLJTpYGVnBBgAZ9On9j7IqABJoIsJAve17NVaEEhS6RDGIa/x7BM/Ag0k9g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
     <div class="app-layout">
