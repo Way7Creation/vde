@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Хост: localhost
--- Время создания: Май 28 2025 г., 21:15
+-- Время создания: Май 29 2025 г., 09:35
 -- Версия сервера: 8.0.42-0ubuntu0.22.04.1
 -- Версия PHP: 8.1.2-1ubuntu2.21
 
@@ -428,15 +428,6 @@ CREATE TABLE `roles` (
   `description` text
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
---
--- Дамп данных таблицы `roles`
---
-
-INSERT INTO `roles` (`role_id`, `name`, `description`) VALUES
-(1, 'admin', 'Administrator with full access'),
-(2, 'client', 'Registered client user'),
-(3, 'guest', 'Unregistered guest user');
-
 -- --------------------------------------------------------
 
 --
@@ -583,13 +574,6 @@ CREATE TABLE `users` (
   `last_login_at` timestamp NULL DEFAULT NULL,
   `last_login_ip` varchar(45) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Дамп данных таблицы `users`
---
-
-INSERT INTO `users` (`user_id`, `username`, `email`, `password_hash`, `role_id`, `is_active`, `created_at`, `updated_at`, `is_guest`, `first_name`, `last_name`, `phone`, `is_legal_entity`, `inn`, `company_name`, `city_id`, `password_reset_token`, `password_reset_expires`, `email_verified_at`, `two_factor_secret`, `two_factor_enabled`, `last_login_at`, `last_login_ip`) VALUES
-(1, 'waysen_admin', 'vde76ru@yandex.ru', '$2y$10$BQAhwxEICT6v.xKk9mlbweO820FjbumfgPQLK/zQjOTf9PXXAIeZO', 1, 1, '2025-05-02 11:52:58', '2025-05-05 21:13:43', 0, NULL, NULL, NULL, 0, NULL, NULL, 3, NULL, NULL, NULL, NULL, 0, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -1116,7 +1100,7 @@ ALTER TABLE `related_products`
 -- AUTO_INCREMENT для таблицы `roles`
 --
 ALTER TABLE `roles`
-  MODIFY `role_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `role_id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT для таблицы `search_logs`
@@ -1158,7 +1142,7 @@ ALTER TABLE `supplier_mappings`
 -- AUTO_INCREMENT для таблицы `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `user_id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT для таблицы `user_profiles`
